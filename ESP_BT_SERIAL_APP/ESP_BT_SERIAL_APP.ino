@@ -36,7 +36,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
         if (refreshLED == 1) {
           for (int i = 0; i < NUMPIXELS; i++) {
-            pixels.Color(i, 0, 0, 0);
+            pixels.setPixelColor(i, pixels.Color(0,0,0));
           }
         }
 
@@ -44,7 +44,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
         Serial.print("red = ");Serial.println(red);
         Serial.print("green = ");Serial.println(green);
         Serial.print("blue = ");Serial.println(blue);
-        Serial.print("Refresh = ");Serial.println(refreshlED);
+        Serial.print("Refresh = ");Serial.println(refreshLED);
         Serial.println();
         
         pixels.setPixelColor((led.toInt() - 1), pixels.Color(red.toInt(), green.toInt(), blue.toInt()));
