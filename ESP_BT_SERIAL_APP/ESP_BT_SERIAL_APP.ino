@@ -1,3 +1,4 @@
+//Uploaded on GitHub 22.01.2021
 #include <Adafruit_NeoPixel.h>
 #define PIN         19
 #define NUMPIXELS   60
