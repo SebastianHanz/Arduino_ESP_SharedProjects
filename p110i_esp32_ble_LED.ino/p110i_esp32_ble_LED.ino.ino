@@ -9,7 +9,8 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ80
 #include <BLEServer.h>
 #include <Arduino.h>
 
-String valor, led, red, green, blue, refreshLED;
+String valor, led, red, green, blue;
+int refreshLED;
 
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
@@ -34,20 +35,22 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
         if (refreshLED == 1) {
           for (int i = 0; i < NUMPIXELS; i++) {
-            pixels.Color(i, 0, 0, 0);
+            pixels.setPixelColor(i, 0, 0, 0);
+            pixels.show();
           }
         }
 
-        Serial.print("LED = ");Serial.println(led);
-        Serial.print("red = ");Serial.println(red);
-        Serial.print("green = ");Serial.println(green);
-        Serial.print("blue = ");Serial.println(blue);
+        Serial.print("LED = "); Serial.println(led);
+        Serial.print("red = "); Serial.println(red);
+        Serial.print("green = "); Serial.println(green);
+        Serial.print("blue = "); Serial.println(blue);
+        Serial.print("Refresh = "); Serial.println(refreshLED);
         Serial.println();
-        
+
         pixels.setPixelColor((led.toInt() - 1), pixels.Color(red.toInt(), green.toInt(), blue.toInt()));
         pixels.show();
 
-        pCharacteristic->setValue(valor.c_str()); 
+        pCharacteristic->setValue(valor.c_str());
       }
     }
 };
