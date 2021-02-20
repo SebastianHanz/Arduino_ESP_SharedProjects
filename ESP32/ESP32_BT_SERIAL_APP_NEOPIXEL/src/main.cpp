@@ -27,8 +27,17 @@ uint8_t r, g, b;
 uint32_t color;
 
 byte Merker = 0;
+byte changedFunctionCode = 0;
 
 unsigned long zeit_alt, proglaufzeit, LED_on_time = 1000; //(ms)
+
+void clearLED()
+{
+  for (int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+  pixels.show();
+}
 
 // Sonnenauf-/Untergang /////////////////////////////////////////////
 void setTimer()
@@ -247,7 +256,14 @@ void loop()
 
     //Seperate message-string into 'DataPackets' seperated by ","
     sscanf(receivedMessage.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", &messageArray[0], &messageArray[1], &messageArray[2], &messageArray[3], &messageArray[4], &messageArray[5], &messageArray[6], &messageArray[7], &messageArray[8], &messageArray[9]);
+
+    if (messageArray[0] != changedFunctionCode) {
+      clearLED();
+      changedFunctionCode = messageArray[0];
+      debugSunrise(); //Prints used data to serial
+    }
   }
+
   //delay(20);
 
   if (receivedMessage != "")
@@ -258,10 +274,9 @@ void loop()
     {
       setTimer();
 
-      debugSunrise(); //Prints used data to serial
-
       if ((millis() - zeit_alt) >= LED_on_time)
       {
+
         zeit_alt = millis();
 
         if (((LED_Counter <= NUMPIXELS * 5) && (Merker == 0) && (reset == 0) || ((LED_Counter <= NUMPIXELS * (-4)) && (Merker == 3))))
@@ -331,6 +346,10 @@ void loop()
     {
       setLED();
       Merker = 0;
+    }
+    else if (messageArray[0] == 0)
+    {
+      clearLED();
     }
   }
 }
