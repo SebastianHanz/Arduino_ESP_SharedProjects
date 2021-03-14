@@ -15,7 +15,7 @@ BluetoothSerial SerialBT;
 String receivedMessage = "", led, red, green, blue, Sunrise, Daylight, Sunset, Reset;
 
 //General
-int messageArray[10]; //Structure: [0]= FunctionCode; [1]=DataPacket1; [2]=DataPacket2...
+int messageArray[11]; //Structure: [0]= FunctionCode; [1]=DataPacket1; [2]=DataPacket2...
 
 //Sunrise/Sunset
 int timerSunrise, timerDaylight, timerSunset, reset = 0;
@@ -33,7 +33,8 @@ unsigned long zeit_alt, proglaufzeit, LED_on_time = 1000; //(ms)
 
 void clearLED()
 {
-  for (int i = 0; i < NUMPIXELS; i++) {
+  for (int i = 0; i < NUMPIXELS; i++)
+  {
     pixels.setPixelColor(i, pixels.Color(0, 0, 0));
   }
   pixels.show();
@@ -255,9 +256,10 @@ void loop()
     receivedMessage = SerialBT.readString();
 
     //Seperate message-string into 'DataPackets' seperated by ","
-    sscanf(receivedMessage.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", &messageArray[0], &messageArray[1], &messageArray[2], &messageArray[3], &messageArray[4], &messageArray[5], &messageArray[6], &messageArray[7], &messageArray[8], &messageArray[9]);
+    sscanf(receivedMessage.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", &messageArray[0], &messageArray[1], &messageArray[2], &messageArray[3], &messageArray[4], &messageArray[5], &messageArray[6], &messageArray[7], &messageArray[8], &messageArray[9], &messageArray[10]);
 
-    if (messageArray[0] != changedFunctionCode) {
+    if (messageArray[0] != changedFunctionCode)
+    {
       clearLED();
       changedFunctionCode = messageArray[0];
       debugSunrise(); //Prints used data to serial
