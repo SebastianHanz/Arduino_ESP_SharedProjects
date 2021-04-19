@@ -1,5 +1,5 @@
 /*
-TODO: Testing recent changes on real Hardware
+  TODO: Testing recent changes on real Hardware
 */
 
 #include <Arduino.h>
@@ -45,6 +45,265 @@ byte Merker = 0;
 byte changedFunctionCode;
 
 unsigned long zeit_alt, proglaufzeit, LED_on_time = 1000; //(ms)
+
+void clearLED()
+{
+  for (int i = 0; i < NUMPIXELS; i++)
+  {
+    pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+    pixels.show();
+  }
+}
+
+// Sonnenauf-/Untergang /////////////////////////////////////////////
+void setTimer()
+{
+  timerSunrise = messageArray[1];  //[1]=DataPacket1;
+  timerDaylight = messageArray[2]; //...
+  timerSunset = messageArray[3];
+  reset = messageArray[4]; //[4]=DataPacket4;
+  Serial.println();
+}
+
+void setTimer2()
+{
+  timerSunrise = messageArray[1];  //[1]=DataPacket1;
+  timerDaylight = messageArray[2]; //...
+  timerSunset = messageArray[3];
+  reset = messageArray[4]; //[4]=DataPacket4;
+  dayOfWeekON1 = messageArray[5];
+  timeHourON1 = messageArray[6];
+  timeMinuteON1 = messageArray[7];
+  dayOfWeekOFF1 = messageArray[8];
+  timeHourOFF1 = messageArray[9];
+  timeMinuteOFF1 = messageArray[10];
+}
+
+void fadeIn()
+{
+  for (int i = 0; i < NUMPIXELS * 5; i++)
+  {
+    LED_Counter_fade = LED_Counter - i;
+    if (LED_Counter_fade <= NUMPIXELS)
+    {
+      color = pixels.getPixelColor(LED_Counter_fade);
+      r = color >> 16;
+      g = color >> 8;
+      b = color;
+      if (r < 205)
+      {
+        r = r + 50;
+      }
+      else
+      {
+        r = 255;
+      }
+
+      if (g < 254)
+      {
+        g = g + 1;
+      }
+      else
+      {
+        g = 255;
+      }
+      if (b < 254 && r > 190 && g > 55)
+      {
+        b = b + 1;
+        /*} else {
+            b = 255;*/
+      }
+      pixels.setPixelColor(LED_Counter_fade, pixels.Color(r, g, b));
+    }
+  }
+  LED_Counter += 1;
+  pixels.show();
+}
+
+void fadeOut()
+{
+
+  for (int i = 0; i > NUMPIXELS * (-4); i--)
+  {
+    LED_Counter_fade = LED_Counter - i;
+    if (LED_Counter_fade >= NUMPIXELS * (-4))
+    {
+      color = pixels.getPixelColor(LED_Counter_fade);
+      r = color >> 16;
+      g = color >> 8;
+      b = color;
+
+      if (r >= 2)
+      {
+        r = r - 2;
+      }
+
+      else
+      {
+        r = 0;
+      }
+
+      if (g >= 4)
+      {
+        g = g - 4;
+      }
+      else
+      {
+        g = 0;
+      }
+
+      if (b >= 6)
+      {
+        b = b - 6;
+      }
+      else
+      {
+        b = 0;
+      }
+      pixels.setPixelColor(LED_Counter_fade, pixels.Color(r, g, b));
+    }
+  }
+  LED_Counter = LED_Counter - 1;
+  pixels.show();
+}
+
+void debugSunrise()
+{
+  Serial.print("receivedMessage= ");
+  Serial.println(receivedMessage);
+  Serial.print("reset= ");
+  Serial.println(reset);
+  Serial.print("Led-ontime ");
+  Serial.println(LED_on_time);
+  Serial.println(LED_Counter);
+  Serial.println(Merker);
+  Serial.println(NUMPIXELS * 5);
+  Serial.print("Sunrise=");
+  Serial.println(timerSunrise);
+  Serial.print("Daylight=");
+  Serial.println(timerDaylight);
+  Serial.print("Sunset=");
+  Serial.println(timerSunset);
+  Serial.print("cntDelay=");
+  Serial.println(cntDelay);
+  Serial.print("LED_FADE=");
+  Serial.println(LED_Counter_fade);
+
+  for (int i = 0; i < 11; i++)
+  {
+    Serial.print("messageArray[");
+    Serial.print(i);
+    Serial.print("] =");
+    Serial.println(messageArray[i]);
+  }
+
+  Serial.print("Tag der Woche: ");
+  Serial.println(actDayOfWeek);
+  Serial.print("Stunde: ");
+  Serial.println(actHour);
+  Serial.print("Minute: ");
+  Serial.println(actMinute);
+}
+// ENDE Sonnenauf-/Untergang /////////////////////////////////////////////
+
+void debugRTC()
+{
+  Serial.println();
+  Serial.println("Begin Debug RTC");
+  Serial.println();
+  Serial.print("Aktueller Wochentag: ");
+  Serial.println(actDayOfWeek);
+  Serial.print("Wochentag EIN 1: ");
+  Serial.println(dayOfWeekON1);
+  Serial.print("Aktuelle Stunde: ");
+  Serial.println(actHour);
+  Serial.print("Stunde EIN 1: ");
+  Serial.println(timeHourON1);
+  Serial.print("Aktuelle Minute: ");
+  Serial.println(actMinute);
+  Serial.print("Minute EIN 1: ");
+  Serial.println(timeMinuteON1);
+  Serial.println(ON);
+  Serial.println("End Debug RTC");
+  Serial.println();
+}
+// LED-Control  /////////////////////////////////////////////////////////
+void setLED()
+{
+
+  led = messageArray[1];
+  red = messageArray[2];
+  green = messageArray[3];
+  blue = messageArray[4];
+  refreshLED = messageArray[5];
+  RedLED = messageArray[6];
+  GreenLED = messageArray[7];
+  BlueLED = messageArray[8];
+  WhiteLED = messageArray[9];
+
+  if (refreshLED == 1)
+  {
+    for (int i = 0; i < NUMPIXELS; i++)
+    {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+    }
+  }
+  if (RedLED == 1)
+  {
+    for (int i = 0; i < NUMPIXELS; i++)
+    {
+      pixels.setPixelColor(i, pixels.Color(255, 0, 0));
+    }
+  }
+  if (GreenLED == 1)
+  {
+    for (int i = 0; i < NUMPIXELS; i++)
+    {
+      pixels.setPixelColor(i, pixels.Color(0, 255, 0));
+    }
+  }
+  if (BlueLED == 1)
+  {
+    for (int i = 0; i < NUMPIXELS; i++)
+    {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 255));
+    }
+  }
+
+  if (WhiteLED == 1)
+  {
+    for (int i = 0; i < NUMPIXELS; i++)
+    {
+      pixels.setPixelColor(i, pixels.Color(255, 255, 255));
+    }
+  }
+  Serial.print("receivedMessage= ");
+  Serial.println(receivedMessage);
+  Serial.print("LED = ");
+  Serial.println(led);
+  Serial.print("red = ");
+  Serial.println(red);
+  Serial.print("green = ");
+  Serial.println(green);
+  Serial.print("blue = ");
+  Serial.println(blue);
+  Serial.print("Refresh = ");
+  Serial.println(refreshLED);
+  Serial.print("RedLED = ");
+  Serial.println(RedLED);
+  Serial.print("GreenLED = ");
+  Serial.println(GreenLED);
+  Serial.print("BlueLED = ");
+  Serial.println(BlueLED);
+  Serial.print("WhiteLED = ");
+  Serial.println(WhiteLED);
+  Serial.println();
+
+  pixels.setPixelColor((led.toInt() - 1), pixels.Color(red.toInt(), green.toInt(), blue.toInt()));
+  pixels.show();
+}
+
+// ENDE LED-Control  /////////////////////////////////////////////////////
 
 void setup()
 {
@@ -218,7 +477,7 @@ void loop()
 
         //Schrittkette Bedingungen ->Schritte= Wert von Merker
         //if (((LED_Counter <= NUMPIXELS * 5) && (Merker == 0) && (reset == 0) && (ON == TRUE)) || (((LED_Counter <= NUMPIXELS * (-4)) && (Merker == 3))))
-        if ((LED_Counter <= NUMPIXELS * 5) && (Merker == 0) && (reset == 0) && (ON == TRUE))
+        if ((LED_Counter <= NUMPIXELS * 5) && (Merker == 0) && (reset == 0) && (ON == true))
         {
           Merker = 1;
           LED_Counter_fade = 0;
@@ -233,7 +492,7 @@ void loop()
         }
 
         //else if (Merker == 2 && (cntDelay <= LED_on_time) && (cntDelay <= 0))
-        else if ((Merker == 2) && (ON == FALSE))
+        else if ((Merker == 2) && (ON == false))
         { // timeWait=5 (Sekunden) -> (5 * (1000/1))/4 = 5 Sekunden    1 war hier LED_on_time und wurde von mir gesetzt
           Merker = 3;
           LED_Counter = 60;
@@ -291,262 +550,4 @@ void loop()
       clearLED();
     }
   }
-
-  void clearLED()
-  {
-    for (int i = 0; i < NUMPIXELS; i++)
-    {
-      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
-      pixels.show();
-    }
-  }
-
-  // Sonnenauf-/Untergang /////////////////////////////////////////////
-  void setTimer()
-  {
-    timerSunrise = messageArray[1];  //[1]=DataPacket1;
-    timerDaylight = messageArray[2]; //...
-    timerSunset = messageArray[3];
-    reset = messageArray[4]; //[4]=DataPacket4;
-    Serial.println();
-  }
-
-  void setTimer2()
-  {
-    timerSunrise = messageArray[1];  //[1]=DataPacket1;
-    timerDaylight = messageArray[2]; //...
-    timerSunset = messageArray[3];
-    reset = messageArray[4]; //[4]=DataPacket4;
-    dayOfWeekON1 = messageArray[5];
-    timeHourON1 = messageArray[6];
-    timeMinuteON1 = messageArray[7];
-    dayOfWeekOFF1 = messageArray[8];
-    timeHourOFF1 = messageArray[9];
-    timeMinuteOFF1 = messageArray[10];
-  }
-
-  void fadeIn()
-  {
-    for (int i = 0; i < NUMPIXELS * 5; i++)
-    {
-      LED_Counter_fade = LED_Counter - i;
-      if (LED_Counter_fade <= NUMPIXELS)
-      {
-        color = pixels.getPixelColor(LED_Counter_fade);
-        r = color >> 16;
-        g = color >> 8;
-        b = color;
-        if (r < 205)
-        {
-          r = r + 50;
-        }
-        else
-        {
-          r = 255;
-        }
-
-        if (g < 254)
-        {
-          g = g + 1;
-        }
-        else
-        {
-          g = 255;
-        }
-        if (b < 254 && r > 190 && g > 55)
-        {
-          b = b + 1;
-          /*} else {
-          b = 255;*/
-        }
-        pixels.setPixelColor(LED_Counter_fade, pixels.Color(r, g, b));
-      }
-    }
-    LED_Counter += 1;
-    pixels.show();
-  }
-
-  void fadeOut()
-  {
-
-    for (int i = 0; i > NUMPIXELS * (-4); i--)
-    {
-      LED_Counter_fade = LED_Counter - i;
-      if (LED_Counter_fade >= NUMPIXELS * (-4))
-      {
-        color = pixels.getPixelColor(LED_Counter_fade);
-        r = color >> 16;
-        g = color >> 8;
-        b = color;
-
-        if (r >= 2)
-        {
-          r = r - 2;
-        }
-
-        else
-        {
-          r = 0;
-        }
-
-        if (g >= 4)
-        {
-          g = g - 4;
-        }
-        else
-        {
-          g = 0;
-        }
-
-        if (b >= 6)
-        {
-          b = b - 6;
-        }
-        else
-        {
-          b = 0;
-        }
-        pixels.setPixelColor(LED_Counter_fade, pixels.Color(r, g, b));
-      }
-    }
-    LED_Counter = LED_Counter - 1;
-    pixels.show();
-  }
-
-  void debugSunrise()
-  {
-    Serial.print("receivedMessage= ");
-    Serial.println(receivedMessage);
-    Serial.print("reset= ");
-    Serial.println(reset);
-    Serial.print("Led-ontime ");
-    Serial.println(LED_on_time);
-    Serial.println(LED_Counter);
-    Serial.println(Merker);
-    Serial.println(NUMPIXELS * 5);
-    Serial.print("Sunrise=");
-    Serial.println(timerSunrise);
-    Serial.print("Daylight=");
-    Serial.println(timerDaylight);
-    Serial.print("Sunset=");
-    Serial.println(timerSunset);
-    Serial.print("cntDelay=");
-    Serial.println(cntDelay);
-    Serial.print("LED_FADE=");
-    Serial.println(LED_Counter_fade);
-
-    for (int i = 0; i < 11; i++)
-    {
-      Serial.print("messageArray[");
-      Serial.print(i);
-      Serial.print("] =");
-      Serial.println(messageArray[i]);
-    }
-
-    Serial.print("Tag der Woche: ");
-    Serial.println(actDayOfWeek);
-    Serial.print("Stunde: ");
-    Serial.println(actHour);
-    Serial.print("Minute: ");
-    Serial.println(actMinute);
-  }
-  // ENDE Sonnenauf-/Untergang /////////////////////////////////////////////
-
-  void debugRTC()
-  {
-    Serial.println();
-    Serial.println("Begin Debug RTC");
-    Serial.println();
-    Serial.print("Aktueller Wochentag: ");
-    Serial.println(actDayOfWeek);
-    Serial.print("Wochentag EIN 1: ");
-    Serial.println(dayOfWeekON1);
-    Serial.print("Aktuelle Stunde: ");
-    Serial.println(actHour);
-    Serial.print("Stunde EIN 1: ");
-    Serial.println(timeHourON1);
-    Serial.print("Aktuelle Minute: ");
-    Serial.println(actMinute);
-    Serial.print("Minute EIN 1: ");
-    Serial.println(timeMinuteON1);
-    Serial.println(ON);
-    Serial.println("End Debug RTC");
-    Serial.println();
-  }
-  // LED-Control  /////////////////////////////////////////////////////////
-  void setLED()
-  {
-
-    led = messageArray[1];
-    red = messageArray[2];
-    green = messageArray[3];
-    blue = messageArray[4];
-    refreshLED = messageArray[5];
-    RedLED = messageArray[6];
-    GreenLED = messageArray[7];
-    BlueLED = messageArray[8];
-    WhiteLED = messageArray[9];
-
-    if (refreshLED == 1)
-    {
-      for (int i = 0; i < NUMPIXELS; i++)
-      {
-        pixels.setPixelColor(i, pixels.Color(0, 0, 0));
-      }
-    }
-    if (RedLED == 1)
-    {
-      for (int i = 0; i < NUMPIXELS; i++)
-      {
-        pixels.setPixelColor(i, pixels.Color(255, 0, 0));
-      }
-    }
-    if (GreenLED == 1)
-    {
-      for (int i = 0; i < NUMPIXELS; i++)
-      {
-        pixels.setPixelColor(i, pixels.Color(0, 255, 0));
-      }
-    }
-    if (BlueLED == 1)
-    {
-      for (int i = 0; i < NUMPIXELS; i++)
-      {
-        pixels.setPixelColor(i, pixels.Color(0, 0, 255));
-      }
-    }
-
-    if (WhiteLED == 1)
-    {
-      for (int i = 0; i < NUMPIXELS; i++)
-      {
-        pixels.setPixelColor(i, pixels.Color(255, 255, 255));
-      }
-    }
-    Serial.print("receivedMessage= ");
-    Serial.println(receivedMessage);
-    Serial.print("LED = ");
-    Serial.println(led);
-    Serial.print("red = ");
-    Serial.println(red);
-    Serial.print("green = ");
-    Serial.println(green);
-    Serial.print("blue = ");
-    Serial.println(blue);
-    Serial.print("Refresh = ");
-    Serial.println(refreshLED);
-    Serial.print("RedLED = ");
-    Serial.println(RedLED);
-    Serial.print("GreenLED = ");
-    Serial.println(GreenLED);
-    Serial.print("BlueLED = ");
-    Serial.println(BlueLED);
-    Serial.print("WhiteLED = ");
-    Serial.println(WhiteLED);
-    Serial.println();
-
-    pixels.setPixelColor((led.toInt() - 1), pixels.Color(red.toInt(), green.toInt(), blue.toInt()));
-    pixels.show();
-  }
-
-  // ENDE LED-Control  /////////////////////////////////////////////////////
+}
