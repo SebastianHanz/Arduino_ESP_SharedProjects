@@ -12,11 +12,12 @@
 
 RTC_DS3231 rtc;
 
-char daysOfTheWeek[7][12] = {"Sonntag", "Montag", "Dienstag", "4", "Donnerstag", "Freitag", "Samstag"};
+char daysOfTheWeek[7][12] = {"1", "2", "3", "4", "5", "6", "7"};
 String timeHourON1 = "", timeHourOFF1 = "", timeMinuteON1 = "", timeMinuteOFF1 = "";
 String dayOfWeekON1 = "", dayOfWeekOFF1 = "";
 
 String actHour, actMinute, actDayOfWeek;
+
 bool ON = false;
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
